@@ -1,65 +1,72 @@
-import Head from 'next/head'
-import styles from '../styles/Home.module.css'
+import React, { useContext } from "react";
+import NewsCards from "../components/NewsCards";
+import {
+  CssBaseline,
+  Divider,
+  Grid,
+  makeStyles,
+  Paper,
+  TextField,
+} from "@material-ui/core";
+import Navbar from "../components/Navbar";
+import GlobalContext from "../context/context";
+const useStyels = makeStyles({
+  cardContainer: {
+    padding: "10%",
+  },
+});
 
-export default function Home() {
+function index(props) {
+  const { posts } = props;
+  const { articles } = posts;
+  const { searchPosts } = useContext(GlobalContext);
+
+  const classes = useStyels();
   return (
-    <div className={styles.container}>
-      <Head>
-        <title>Create Next App</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
-      <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
-
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.js</code>
-        </p>
-
-        <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h3>Documentation &rarr;</h3>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
-
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h3>Learn &rarr;</h3>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/master/examples"
-            className={styles.card}
-          >
-            <h3>Examples &rarr;</h3>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-          >
-            <h3>Deploy &rarr;</h3>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
-        </div>
-      </main>
-
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <img src="/vercel.svg" alt="Vercel Logo" className={styles.logo} />
-        </a>
-      </footer>
-    </div>
-  )
+    <Grid container spacing={4} direction="column">
+      <Grid item xs={3}>
+        <Navbar />
+      </Grid>
+      <Grid item></Grid>
+      <Grid item container spacing={2} direction="row">
+        {searchPosts
+          ? searchPosts.map((item) => {
+              return (
+                <Grid item xs={12} sm={4} md={4}>
+                  <NewsCards
+                    props={item}
+                    key={new Date().getTime().toString()}
+                  />
+                </Grid>
+              );
+            })
+          : articles.map((item) => {
+              return (
+                <Grid item xs={12} sm={4} md={4}>
+                  <NewsCards
+                    props={item}
+                    key={new Date().getTime().toString()}
+                  />
+                </Grid>
+              );
+            })}
+      </Grid>
+      <CssBaseline />
+    </Grid>
+  );
 }
+
+export const getStaticProps = async () => {
+  const response = await fetch(
+    "https://newsapi.org/v2/top-headlines?country=us&apiKey=1cb83cccf37a4b1b84942ce07256e529"
+  );
+  const data = await response.json();
+
+  return {
+    props: {
+      posts: data,
+    },
+  };
+};
+
+export default index;
